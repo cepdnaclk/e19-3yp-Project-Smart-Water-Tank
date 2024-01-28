@@ -192,7 +192,7 @@ header {
 }
 
 /* Media queries for mobile screens */
-@media (max-width: 767px) {
+/* @media (max-width: 767px) {
   .d-flex {
     flex-direction: column;
     align-items: center;
@@ -223,4 +223,4 @@ header {
     margin-right: 0;
     margin-bottom: 0.5rem;
   }
-}
+} */
