@@ -1,65 +1,119 @@
 #include <Arduino_BuiltIn.h>
-#include "utils.h"
+
+#include "certs.h"
+#include <WiFiClientSecure.h>
 #include <PubSubClient.h>
-#include "waterlevel.h"
+#include <ArduinoJson.h>
+#include "WiFi.h"
 
-#define TRIGPIN 18
-#define ECHOPIN 5
+#define INLETVALVE 2
+#define OUTLETVALVE 19
+#define PUMP 21
 
-int prevLevel = 0;
+int inletValve = 0;
+int outletValve = 0;
+int pump = 0;
 
-void setup() {
-    Serial.begin(115200);
-    pinMode(INLETVALVE,OUTPUT);
-    pinMode(OUTLETVALVE,OUTPUT);
-    pinMode(PUMP,OUTPUT);
-    pinMode(32,OUTPUT);
-    pinMode(35,OUTPUT);
-    waterLevelPinSet(TRIGPIN,ECHOPIN);
-    connectAWS();
+#define AWS_IOT_PUBLISH_TOPIC   "esp32/pub"
+#define AWS_IOT_SUBSCRIBE_TOPIC "esp32/sub"
+
+WiFiClientSecure net = WiFiClientSecure();
+PubSubClient client(net);
+
+void messageHandler(char* topic, byte* payload, unsigned int length) {
+  Serial.print("incoming: ");
+  Serial.println(topic);
+
+  char inputValvetrue[] = "inputValvetrue";
+  char inputValvefalse[] = "inputValvefalse";
+  char outputValvetrue[] = "outputValvetrue";
+  char outputValvefalse[] = "outputValvefalse";
+  char motorPumptrue[] = "motorPumptrue";
+  char motorPumpfalse[] = "motorPumpfalse";
+
+  char message[length+1];
+ 
+  for(int i=0; i<length; i++){
+    message[i]=(char) payload[i];
+  }
+  message[length] = '\0';
+  //Serial.println(message);
+
+  if(strcmp(message,inputValvetrue)==0){
+    inletValve = 1;
+  }
+  if(strcmp(message,inputValvefalse)==0){
+    inletValve = 0;
+  }
+  if(strcmp(message,outputValvetrue)==0){
+    outletValve = 1;
+  }
+  if(strcmp(message,outputValvefalse)==0){
+    outletValve = 0;
+  }
+  if(strcmp(message,motorPumptrue)==0){
+    pump = 1;
+  }
+  if(strcmp(message,motorPumpfalse)==0){
+    pump = 0;
+  }
+
+  if(inletValve == 0){
+    digitalWrite(INLETVALVE,LOW);
+  }else if(inletValve == 1){
+    digitalWrite(INLETVALVE,HIGH);
+  }
+
+  if(outletValve == 0){
+    digitalWrite(OUTLETVALVE,LOW);
+  }else if(outletValve==1){
+    digitalWrite(OUTLETVALVE,HIGH);
+  }
+
+  if(pump == 0){
+    digitalWrite(PUMP,LOW);
+  }else if(pump == 1){
+    digitalWrite(PUMP,HIGH);
+  }
 }
 
-void loop() {
 
-  client.loop();
-  int level = waterLevelCalculator(TRIGPIN,ECHOPIN);
-  if(level!=100){
-    Serial.println(level);
+void connectAWS() {
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+ 
+  Serial.println("Connecting to Wi-Fi");
+ 
+  while (WiFi.status() != WL_CONNECTED){
+    delay(500);
+    Serial.print(".");
   }
-
-  if((int)(level/10)==1 && prevLevel!=10){
-    client.publish("esp32/pub","10");
-    prevLevel = 10;
-    
-  }else if((int)(level/10)==2 && prevLevel!=20){
-    client.publish("esp32/pub","20");
-    prevLevel = 20;
-  }else if((int)(level/10)==3 && prevLevel!=30){
-    client.publish("esp32/pub","30");
-    prevLevel = 30;
-  }else if((int)(level/10)==4 && prevLevel!=40){
-    client.publish("esp32/pub","40");
-    prevLevel = 40;
-  }else if((int)(level/10)==5 && prevLevel!=50){
-    client.publish("esp32/pub","50");
-    prevLevel = 50;
-  }else if((int)(level/10)==6 && prevLevel!=60){
-    client.publish("esp32/pub","60");
-    prevLevel = 60;
-  }else if((int)(level/10)==7 && prevLevel!=70){
-    client.publish("esp32/pub","70");
-    prevLevel = 70;
-  }else if((int)(level/10)==8 && prevLevel!=80){
-    client.publish("esp32/pub","80");
-    prevLevel = 80;
-  }else if((int)(level/10)==9 && prevLevel!=90){
-    client.publish("esp32/pub","90");
-    prevLevel = 90;
+ 
+  // Configure WiFiClientSecure to use the AWS IoT device credentials
+  net.setCACert(AWS_CERT_CA);
+  net.setCertificate(AWS_CERT_CRT);
+  net.setPrivateKey(AWS_CERT_PRIVATE);
+ 
+  // Connect to the MQTT broker on the AWS endpoint we defined earlier
+  client.setServer(AWS_IOT_ENDPOINT, 8883);
+ 
+  // Create a message handler
+  client.setCallback(messageHandler);
+ 
+  Serial.println("Connecting to AWS IOT");
+ 
+  while (!client.connect(THINGNAME)) {
+    Serial.print(".");
+    delay(100);
   }
-
-  if(!client.connect(THINGNAME)){
-    connectAWS();
+ 
+  if (!client.connected()) {
+    Serial.println("AWS IoT Timeout!");
+    return;
   }
-  
-  delay(500); 
+ 
+  client.subscribe(AWS_IOT_SUBSCRIBE_TOPIC);
+ 
+  Serial.println("AWS IoT Connected!");
 }
+
