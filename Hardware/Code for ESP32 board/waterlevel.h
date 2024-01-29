@@ -1,5 +1,4 @@
-#define INLETVALVE 21
-#define OUTLETVALVE 19
+float duration, distance;
 
 void waterLevelPinSet(int trigPin, int echoPin){
 
@@ -17,9 +16,21 @@ int waterLevelCalculator(int trigPin, int echoPin){
 
     digitalWrite(trigPin,LOW);
 
-    float duration = pulseIn(echoPin, HIGH);
+    float durationSum = 0;
 
-    int level = (int)(duration/100);
+    //for(int i=0;i<20;i++){
+      //durationSum = durationSum + pulseIn(echoPin, HIGH);
+    //}
+
+    duration = pulseIn(echoPin, HIGH);
+
+    distance = (duration / 2) * 0.343;
+
+    Serial.println(distance);
+
+    int level = map(distance,200,600,95,5);
+
+    //int level = (int)(duration/100);
 
     if(level>100){
       level = 100;
@@ -29,11 +40,7 @@ int waterLevelCalculator(int trigPin, int echoPin){
     }
 
     if(level>90 && level!=100){
-      digitalWrite(INLETVALVE,HIGH);
-      digitalWrite(14,HIGH);
-    }else{
-      digitalWrite(INLETVALVE,LOW);
-      digitalWrite(14,LOW);
+      inletValve = 0;
     }
 
     if(level<20 && level!=0){
