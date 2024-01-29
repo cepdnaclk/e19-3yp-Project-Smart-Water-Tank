@@ -134,7 +134,8 @@ export default function Monitoring() {
       if (isTankRegistered) {
         getWaterLevel();
   
-        const intervalId = setInterval(getWaterLevel, 100);
+        const intervalId = setInterval(getWaterLevel, 30000); 
+
 
         // Cleanup the interval on component unmount
         return () => clearInterval(intervalId);

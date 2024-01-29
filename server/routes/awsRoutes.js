@@ -75,8 +75,6 @@ router.post("/send-input-valve", async (req, res) => {
     });
 
     try {
-      var dynamicData = "Hiiii";
-
       device.publish(`${waterLevelModels.tankId}/sub`, req.body.string);
       console.log(`${waterLevelModels.tankId}/sub`);
 
@@ -84,7 +82,11 @@ router.post("/send-input-valve", async (req, res) => {
     } catch (err) {
       res
         .status(500)
-        .send({ message: "Error sending data to AWS IoT", success: false, err });
+        .send({
+          message: "Error sending data to AWS IoT",
+          success: false,
+          err,
+        });
     }
   }
 });
@@ -106,7 +108,11 @@ router.post("/send-output-valve", async (req, res) => {
     } catch (err) {
       res
         .status(500)
-        .send({ message: "Error sending data to AWS IoT", success: false, err });
+        .send({
+          message: "Error sending data to AWS IoT",
+          success: false,
+          err,
+        });
     }
   }
 });
@@ -119,8 +125,6 @@ router.post("/send-motor-pump", async (req, res) => {
     });
 
     try {
-      var dynamicData = "hiiiiiii";
-
       device.publish(`${waterLevelModels.tankId}/sub`, req.body.string);
       console.log(`${waterLevelModels.tankId}/sub`);
 
@@ -128,8 +132,52 @@ router.post("/send-motor-pump", async (req, res) => {
     } catch (err) {
       res
         .status(500)
-        .send({ message: "Error sending data to AWS IoT", success: false, err });
+        .send({
+          message: "Error sending data to AWS IoT",
+          success: false,
+          err,
+        });
     }
+  }
+});
+
+// Move waterLevelModels and isSaving outside the route handler
+let waterLevelModels;
+let isSaving = false;
+
+device.on("message", async function (topic, payload) {
+  try {
+    if (waterLevelModels) {
+      const receivedData = payload.toString();
+      latestWaterLevel = receivedData;
+      latestTopic = topic;
+
+      console.log(`Received message on topic ${topic}:`, receivedData);
+
+      if (
+        receivedData != null &&
+        receivedData != waterLevelModels.waterLevel &&
+        !isSaving
+      ) {
+        try {
+          isSaving = true;
+
+          // Introduce a delay before saving
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+
+          waterLevelModels.waterLevel = receivedData;
+          await waterLevelModels.save();
+
+          isSaving = false;
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+    } else {
+      console.error("waterLevelModels is not defined");
+    }
+  } catch (error) {
+    console.error("Error:", error);
   }
 });
 
@@ -138,40 +186,14 @@ router.post("/receive-water-level", async (req, res) => {
     console.log("Connected to AWS IoT");
 
     if (req.body.userId) {
-      const waterLevelModels = await waterLevelModel.findOne({
+      waterLevelModels = await waterLevelModel.findOne({
         userId: req.body.userId,
       });
-
-      console.log("Water Level:", waterLevelModels.waterLevel);
 
       try {
         console.log(`${waterLevelModels.tankId}/pub`);
 
         device.subscribe(`${waterLevelModels.tankId}/pub`);
-
-        device.on("message", function (topic, payload) {
-          let isSaving = false;
-
-          try {
-            const receivedData = payload.toString();
-            latestWaterLevel = receivedData;
-            latestTopic = topic;
-
-            console.log(`Received message on topic ${topic}:`, receivedData);
-            if (
-              receivedData != null &&
-              receivedData != waterLevelModels.waterLevel &&
-              !isSaving
-            ) {
-              isSaving = true;
-              waterLevelModels.waterLevel = receivedData;
-              waterLevelModels.save();
-              isSaving = false;
-            }
-          } catch (error) {
-            console.error("Error:", error);
-          }
-        });
 
         console.log("Waiting for messages...");
       } catch {
@@ -194,5 +216,7 @@ router.post("/receive-water-level", async (req, res) => {
     });
   }
 });
+
+
 
 module.exports = router;

@@ -1,0 +1,74 @@
+/* dash.css */
+
+/* Container Styles */
+.card-container {
+  margin: 16px;
+}
+
+/* Guideline Card Styles */
+.guideline-card {
+  margin-bottom: 16px;
+}
+
+/* Statistics Card Styles */
+.statistics-card {
+  margin-top: 16px;
+}
+
+/* Additional Info Card Styles */
+.additional-info-card {
+  margin-top: 16px;
+}
+
+/* Custom Section Card Styles */
+.custom-section-card {
+  margin-top: 16px;
+}
+
+/* Heading Styles */
+h1.page-title {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+/* Paragraph Styles */
+p {
+  margin-bottom: 8px;
+}
+
+/* List Styles */
+ul {
+  margin-bottom: 8px;
+  padding-left: 20px;
+}
+
+li {
+  margin-bottom: 4px;
+}
+
+/* Alert Styles */
+.ant-alert {
+  margin-top: 16px;
+}
+
+/* Divider Styles */
+.ant-divider {
+  margin: 16px 0;
+}
+
+/* Global Styles */
+body {
+  font-family: "Arial", sans-serif;
+}
+
+/* Customize styles based on your design preferences */
