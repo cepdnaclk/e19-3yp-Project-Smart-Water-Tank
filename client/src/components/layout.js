@@ -2,13 +2,16 @@ import React, { useState } from "react";
 import "./styles/layout.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Badge} from "antd";
+import { message, Modal } from "antd";
+import { Badge } from "antd";
+import { useToaster } from 'react-hot-toast';
 
 function Layout({ children }) {
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [collapsed, setCollapsed] = useState(false);
   const { user } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const toaster = useToaster();
 
   const userMenu = [
     {
@@ -37,7 +40,7 @@ function Layout({ children }) {
     {
       name: "Home",
       icon: "ri-home-2-fill",
-      path: "/adminHome",
+      path: "/userHome",
     },
     {
       name: "All Users",
@@ -52,7 +55,7 @@ function Layout({ children }) {
     {
       name: "Profile",
       icon: "ri-file-user-fill ",
-      path: "/profile",
+      path: "/admin/adminProfile",
     },
   ];
 
@@ -60,6 +63,19 @@ function Layout({ children }) {
 
   const handleMenuClick = (index) => {
     setSelectedMenu(index);
+  };
+
+  const handleLogout = () => {
+    Modal.confirm({
+      title: "Logout",
+      content: "Are you sure you want to logout?",
+      onOk: () => {
+        localStorage.clear();
+        navigate("/login");
+        message.success("Logout successful");
+      },
+      onCancel: () => {},
+    });
   };
 
   return (
@@ -103,13 +119,7 @@ function Layout({ children }) {
               );
             })}
 
-            <div
-              className={`d-flex menu-item`}
-              onClick={() => {
-                localStorage.clear();
-                navigate("/login");
-              }}
-            >
+            <div className={`d-flex menu-item`} onClick={handleLogout}>
               <i className="ri-logout-box-r-fill"></i>
               {!collapsed && <Link>Logout</Link>}
             </div>
@@ -129,9 +139,12 @@ function Layout({ children }) {
               ></i>
             )}
 
-            <div className="info-use" onClick={() =>{
-              navigate("/notifications")
-            }}>
+            <div
+              className="info-use"
+              onClick={() => {
+                navigate("/notifications");
+              }}
+            >
               <Badge count={user?.unreadNotifications.length}>
                 <i className="ri-notification-3-fill remix-icon"></i>
               </Badge>
@@ -148,4 +161,4 @@ function Layout({ children }) {
   );
 }
 
-export default Layout; 
+export default Layout;

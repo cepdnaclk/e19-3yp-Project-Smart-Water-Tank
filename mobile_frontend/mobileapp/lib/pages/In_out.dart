@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:mobileapp/handle/userPro.dart';
+
 
 class In_out extends StatefulWidget{
   @override
@@ -15,6 +21,10 @@ class _in_out extends State<In_out>{
   int check=0;
   String checking='start check';
   bool isButtonDisabled = false;
+  String uid= '';
+  bool outputValve = false;
+  bool inputValve = false;
+  bool motorPump = false;
 
   void startTimer() {
     setState(() {
@@ -30,11 +40,71 @@ class _in_out extends State<In_out>{
     });
   }
 
+ Future<void> handleOutputValveChange() async {
+  
+  try {
+    final response = await http.post(
+      Uri.parse("http://54.208.4.191/api/user/hardware/send-output-valve"),
+      headers: {
+      HttpHeaders.contentTypeHeader: 'application/json',
+      },
+      body: json.encode({
+        "userId": uid,
+        "string": "outputValve${!outputValve}",
+      }
+    ),
+    
+    );
+    print(response.body);
+  } catch (error) {
+    print(error);
+  }
+}
+
+Future<void> handleinputValveChange() async {
+  
+  try {
+    final response = await http.post(
+      Uri.parse("http://54.208.4.191/api/user/hardware/send-input-valve"),
+      headers: {
+      HttpHeaders.contentTypeHeader: 'application/json',
+      },
+      body: json.encode({
+        "userId": uid,
+        "string": "inputValve${!inputValve}",
+      }
+    ),
+    );
+  } catch (error) {
+    print(error);
+  }
+}
+
+Future<void> handlemotorpump() async {
+  
+  try {
+    final response = await http.post(
+      Uri.parse("http://54.208.4.191/api/user/hardware/send-motor-pump"),
+     headers: {
+      HttpHeaders.contentTypeHeader: 'application/json',
+      },
+      body: json.encode({
+        "userId": uid,
+        "string": "motorpump${!motorPump}",
+      }
+    ),
+    );
+  } catch (error) {
+    print(error);
+  }
+}
+
  
 
   @override
   Widget build(BuildContext context){
     final screenSize = MediaQuery.of(context).size; // Define screenSize variable
+     uid= Provider.of<userpro>(context).id;
     return Scaffold(
       //backgroundColor: Colors.blue[100],
       appBar:AppBar(
@@ -73,6 +143,8 @@ class _in_out extends State<In_out>{
           setState(() {
             if (pump==0 && check == 0){
                inlet_on ^= 1;
+              handleinputValveChange();
+              inputValve= !inputValve;
             }
            
           });
@@ -93,6 +165,8 @@ class _in_out extends State<In_out>{
           setState(() {
            if (check == 0){
                outlet_on ^= 1;
+               handleOutputValveChange();
+               outputValve= !outputValve;
             }
           });
         }, child:Text('$outlet_on'),style: ButtonStyle(
@@ -113,6 +187,8 @@ class _in_out extends State<In_out>{
           setState(() {
             if (inlet_on==1 && check == 0){
               pump ^= 1;
+               handlemotorpump();
+                motorPump= !motorPump;
             }
           }
           );

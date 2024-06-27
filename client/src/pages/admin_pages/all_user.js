@@ -1,10 +1,13 @@
-import React, { useEffect} from "react";
+// frontend/pages/AllUser.js
+import React, { useEffect } from "react";
 import Layout from "../../components/layout";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { showLoading, hideLoading } from "../../redux/alertsSlice";
 import { useState } from "react";
 import { Table } from "antd";
+
+// const url = "http://localhost:4000";
 
 export default function AllUser() {
   const [users, setUsers] = useState([]);
@@ -14,12 +17,17 @@ export default function AllUser() {
     const getUserData = async () => {
       try {
         dispatch(showLoading());
-        const response = await axios.get("/api/admin/get-all-users", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-  
+
+        const response = await axios.post(
+          `/api/admin/get-all-users`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
         if (response.data.success) {
           setUsers(response.data.data);
         }
@@ -30,13 +38,9 @@ export default function AllUser() {
         dispatch(hideLoading());
       }
     };
-  
+
     getUserData();
   }, [dispatch]);
-  
-  
-  
-  
 
   const columns = [
     {

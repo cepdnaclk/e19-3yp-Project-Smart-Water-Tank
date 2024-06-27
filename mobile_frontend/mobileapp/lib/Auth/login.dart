@@ -1,161 +1,201 @@
-import 'package:mobileapp/Auth/api_service.dart';
-import 'package:mobileapp/Auth/login_request_model.dart';
-import 'package:mobileapp/Auth/signup.dart';
 import 'package:flutter/material.dart';
-import 'package:mobileapp/utill/User_cons.dart';
-import 'package:mobileapp/utill/User_func.dart';
-import 'package:mobileapp/components/cusText.dart';
-import 'package:mobileapp/components/custextField.dart';
-import 'package:mobileapp/components/cusButton.dart';
-import 'package:mobileapp/components/cusIconcon.dart';
-import 'package:mobileapp/pages/home.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
+import 'package:mobileapp/handle/userPro.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
-
+class LoginPage extends StatefulWidget {
   @override
-  State<Login> createState() => _LoginState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  bool isAPIcallProcess = false;
-  bool hidePassword = true;
-  GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
-  String? email;
-  String? password;
+  Future<void> loginUser() async {
+    final String email = _emailController.text;
+    final String password = _passwordController.text;
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://54.208.4.191/api/user/login'),
+        headers: {
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+        body: json.encode({
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      final responseData = json.decode(response.body);
+      print(responseData);
+
+      if (response.statusCode == 200 && responseData['success']) {
+        print(responseData['message']);
+        //final userId = responseData['data']['userId'];
+        final token = responseData['data']; // Extract the token from the response
+        //print('user: $userId');
+        //// Store the token for future use
+        // You can use a state management solution like Provider or Riverpod to store the token globally
+        // For simplicity, I'll store it in shared preferences
+        // Make sure to import the shared_preferences package
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Success'),
+              content: Text('User logged in successfully'),
+              actions: [
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    getUserInfoById(token);
+                    Navigator.pushNamed(context, '/home');
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      } else if (response.statusCode == 200 && !responseData['success']) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Error'),
+              content: Text('Invalid email or password'),
+              actions: [
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Error'),
+              content: Text('Error logging in: ${responseData['message']}'),
+              actions: [
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Error: $e'),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future<void> getUserInfoById(String token) async {
+  print('user in: $token');
+  const url = 'http://54.208.4.191/api/user/get-user-info-by-id';
+  final response = await http.post(
+    Uri.parse(url),
+    headers: {
+     'Authorization': 'Bearer $token',
+    },
+    body: {
+      'token': token,
+    },
+  );
+
+  if (response.statusCode == 200) {
+    final responseData = json.decode(response.body);
+    final success = responseData['success'];
+    final data = responseData['data'];
+    final userID= responseData['data']['_id'];
+    final name=responseData['data']['fullName'];
+
+    if (success) {
+      // User exists, handle the data
+      print('User Info: $data');
+      Provider.of<userpro>(context, listen: false).setuser(userID);
+      Provider.of<userpro>(context, listen: false).setname(name); 
+    } else {
+      // User doesn't exist
+      final message = responseData['message'];
+      print('User Info Error: $message');
+    }
+
+  }
+  else{
+    print('User Info Error: ${response.statusCode}');
+  }}
+
   @override
   Widget build(BuildContext context) {
-    MediaQueryData mediaQueryData = MediaQuery.of(context);
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: mediaQueryData.size.height * 0.02),
-              child: Column(
-                children: [
-                  SizedBox(height: mediaQueryData.size.height * 0.01),
-                  Column(
-                    children: [
-                      SizedBox(height: mediaQueryData.size.height * 0.05),
-                      CustomText(
-                        "Login",
-                        fontSize: mediaQueryData.size.height * 0.04,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      SizedBox(height: mediaQueryData.size.height * 0.04),
-                      CustomTextFeild(
-                        lable: "Enter your email",
-                        mediaQueryData: mediaQueryData,
-                        keyboardType: TextInputType.emailAddress,
-                         onChanged: (value) {
-                          setState(() {
-                            email = value;
-                          });
-                        },
-                      ),
-                      SizedBox(height: mediaQueryData.size.height * 0.01),
-                      CustomTextFeild(
-                        lable: "Enter password",
-                        obscure: true,
-                        mediaQueryData: mediaQueryData,
-                        keyboardType: TextInputType.visiblePassword,
-                        
-                        onChanged: (value) {
-                          setState(() {
-                            password = value;
-                          });
-                        },
-                      ),
-                      SizedBox(height: mediaQueryData.size.height * 0.01),
-                      SizedBox(height: mediaQueryData.size.height * 0.07),
-                      InkWell(
-                      onTap: () {
-
-                        if(validateAndSave()){
-                          setState((){
-                            isAPIcallProcess = true;
-                            });
-                            login_request_model model =  login_request_model(
-                              email: email!, 
-                              password: password!,
-                              );
-                              APIService.login(model).then((response){
-                                if (response){
-                                  Navigator.pushNamedAndRemoveUntil(context,'/home', (route) => false,);
-                                }else{
-
-                                }
-                              });
-                        }
-                                  
-                              
-                          
-                        
-                      },
-                      child: CustomButton(
-                        "Login",
-                        
-                        mediaQueryData: mediaQueryData,
-                        width: mediaQueryData.size.width,
-                    
-                      ),
-                    ),
-                    
-                    InkWell(
-                      onTap: () {
-
-                        UtilFunction.navigateForward(
-                            context, const Signup());
-                      },
-                      child: CustomButton(
-                        "Sign Up",
-                        mediaQueryData: mediaQueryData,
-                        width: mediaQueryData.size.width,
-                      ),
-                    ),
-                    ],
-                  ),
-                  SizedBox(height: mediaQueryData.size.height * 0.04),
-                  CustomText(
-                    "Or login with social account",
-                    fontSize: mediaQueryData.size.height * 0.018,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  SizedBox(height: mediaQueryData.size.height * 0.025),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      CustomIconContainer(
-                        imgPath: UtilConstants.googleImagePath,
-                        mediaQueryData: mediaQueryData,
-                      ),
-                      CustomIconContainer(
-                        imgPath: UtilConstants.facebookImagePath,
-                        mediaQueryData: mediaQueryData,
-                      ),
-                    ],
-                  )
-                ],
+      appBar: AppBar(
+        title: Text('Login'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                labelText: 'Email',
               ),
             ),
-          ),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(
+                labelText: 'Password',
+              ),
+              obscureText: true,
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: loginUser,
+              child: Text('Login'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/signin');
+              },
+              child: Text('Sign Up'),
+            )
+          ],
         ),
       ),
     );
   }
-  bool validateAndSave() {
-  if (email != null && password != null ) {
-    if ( email!.isEmpty || password!.isEmpty ) {
-      // Handle empty fields
-      return false;
-    } else {
-      return true;
-    }
-  }
-  return false;
-  
-}
 }

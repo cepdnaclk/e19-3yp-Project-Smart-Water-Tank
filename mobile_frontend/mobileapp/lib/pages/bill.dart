@@ -7,6 +7,9 @@ class Bill extends StatefulWidget{
 }
 
 class _Bill extends State<Bill>{
+
+  double bill= 0.00;
+  double margin = 0.00;
   @override
   Widget build(BuildContext context){
     final screenSize = MediaQuery.of(context).size; // Define screenSize variable
@@ -33,13 +36,23 @@ class _Bill extends State<Bill>{
          body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Text('Your monthly bill so far:'),
+            Text('Your monthly bill so far:',
+  style: TextStyle(fontSize: 30),
+),
             Container(
               margin: EdgeInsets.all(10),
               color: Colors.grey,
+              child: Text('your bill so far:$bill',style: TextStyle(fontSize: 30),),
             ),
-            Text('Set Monthly bill margin'),
 
+                     Text('Your monthly bill margin:',
+  style: TextStyle(fontSize: 30),
+),
+            Container(
+              margin: EdgeInsets.all(10),
+              color: Colors.grey,
+              child: Text('your bill margin:$margin',style: TextStyle(fontSize: 30),),
+            ),
           ],
          ),
       

@@ -17,8 +17,10 @@ import ControlPanel from "./pages/user_dash/control_panel";
 import UserProfile from "./pages/user_dash/user_profile";
 import Notification from "./pages/notification/notification";
 import AllUser from "./pages/admin_pages/all_user";
+import AdminProfile from "./pages/admin_pages/admin_profile";
 import AllAdmins from "./pages/admin_pages/all_admins";
 import AdminMainDash from "./pages/admin_pages/admin_main_dash";
+
 
 function App() {
   const { loading } = useSelector((state) => state.alerts);
@@ -113,6 +115,15 @@ function App() {
         />
 
         <Route
+          path="/admin/adminProfile"
+          element={
+            <ProtectedRoute>
+              <AdminProfile/>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/notifications"
           element={
             <ProtectedRoute>
@@ -128,7 +139,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-       
+
         <Route
           path="/admin/alladmins"
           element={

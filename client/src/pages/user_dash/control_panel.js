@@ -3,6 +3,7 @@ import Layout from "../../components/layout";
 import axios from "axios";
 import { useSelector } from "react-redux";
 
+
 import {
   Button,
   Switch,
@@ -14,6 +15,8 @@ import {
 } from "antd";
 import { CheckCircleTwoTone, CloseCircleTwoTone } from "@ant-design/icons";
 import "./styles/control_panel.css";
+// const url = "http://localhost:4000";
+// const url = "http://ec2-54-234-133-143.compute-1.amazonaws.com:4000";
 
 export default function ControlPanel() {
   const [outputValve, setOutputValve] = useState(false);
@@ -25,14 +28,14 @@ export default function ControlPanel() {
   const [outletValve, setOutletValve] = useState(true);
   const { user } = useSelector((state) => state.user);
 
-  const [monthlyBillGoal, setMonthlyBillGoal] = useState(100); // Set a default goal
+
 
   const handleOutputValveChange = async () => {
     setOutputValve(!outputValve);
-    checkMonthlyGoal();
+   
 
     try {
-      const response = await axios.post("/api/user/hardware/send-input-valve", {
+      const response = await axios.post(`/api/user/hardware/send-input-valve`, {
         userId: user?._id,
         string: `outputValve${!outputValve}`
       });
@@ -43,9 +46,9 @@ export default function ControlPanel() {
 
   const handleInputValveChange = async() => {
     setInputValve(!inputValve);
-    checkMonthlyGoal();
+
     try {
-      const response = await axios.post("/api/user/hardware/send-output-valve", {
+      const response = await axios.post(`/api/user/hardware/send-output-valve`, {
         userId: user?._id,
         string: `inputValve${!inputValve}`
       });
@@ -56,9 +59,9 @@ export default function ControlPanel() {
 
   const handleMotorPumpChange = async() => {
     setMotorPump(!motorPump);
-    checkMonthlyGoal();
+   
     try {
-      const response = await axios.post("/api/user/hardware/send-motor-pump", {
+      const response = await axios.post(`/api/user/hardware/send-motor-pump`, {
         userId: user?._id,
         string: `motorPump${!motorPump}`
       });
@@ -67,33 +70,36 @@ export default function ControlPanel() {
     }
   };
 
-  const handleBillGoalChange = (value) => {
-    setMonthlyBillGoal(value);
-    checkMonthlyGoal();
-  };
-
-  const checkMonthlyGoal = () => {
-    const totalUsage = calculateTotalUsage();
-    if (totalUsage > monthlyBillGoal) {
-      notifyExceedGoal(totalUsage);
-    }
-  };
-
-  const calculateTotalUsage = () => {
-    // Implement the logic to calculate total monthly usage based on your data
-    return 0; // Replace with actual calculation
-  };
-
-  const notifyExceedGoal = (totalUsage) => {
-    notification.error({
-      message: "Monthly Bill Exceeded!",
-      description: `Your monthly bill goal of $${monthlyBillGoal} has been exceeded. Current total usage: $${totalUsage}.`,
-    });
-  };
 
   return (
     <Layout>
       <h1 className="page-title">Control Panel</h1>
+
+      <div className="guide-section">
+        <h2>How to Use</h2>
+        <p>
+          This control panel allows you to manage the valves and motor pump of
+          your smart water tank. Simply toggle the switches to turn the
+          corresponding components on or off.
+        </p>
+        <p>
+          - The <strong>Output Valve</strong> controls the water flow out of the
+          tank.
+        </p>
+        <p>
+          - The <strong>Input Valve</strong> controls the water flow into the
+          tank.
+        </p>
+        <p>
+          - The <strong>Motor Pump</strong> powers the water pump for internal
+          circulation.
+        </p>
+        <p>
+          The status of each component is displayed with icons and text below
+          the switches.
+        </p>
+      </div>
+
       <div className="card-container">
         <Card className="card">
           <Row gutter={16} className="switch-container">
@@ -127,15 +133,6 @@ export default function ControlPanel() {
               </div>
             </Col>
           </Row>
-          <div className="button-container">
-            <Button
-              type="primary"
-              className="button-primary"
-              onClick={() => alert("Start Manual Operation")}
-            >
-              Start Manual Operation
-            </Button>
-          </div>
         </Card>
 
         <Card className="card">
@@ -153,86 +150,10 @@ export default function ControlPanel() {
               </div>
             </Col>
           </Row>
-
-          <div>
-            <br />
-            <h2 className="status-label">Monthly Bill Goal</h2>
-            <InputNumber
-              min={1}
-              max={1000}
-              defaultValue={monthlyBillGoal}
-              onChange={handleBillGoalChange}
-            />
-          </div>
-          <div className="button-container">
-            <Button
-              type="primary"
-              className="button-primary"
-              onClick={() => alert("Start Manual Operation")}
-            >
-              Start Manual Operation
-            </Button>
-          </div>
         </Card>
       </div>
-      <Card className="status-card">
-        <h2 className="status-label">Device Status</h2>
-        <br></br>
-        <Row gutter={32} justify="center" align="middle">
-          <Col span={6}>
-            <h3 className="switch-label">Water Level Sensor</h3>
-            <div className="status-icon">
-              {waterLevelSensor ? (
-                <CheckCircleTwoTone twoToneColor="#52c41a" />
-              ) : (
-                <CloseCircleTwoTone twoToneColor="#eb2f96" />
-              )}
-              <span className="status-text">
-                {waterLevelSensor ? "Working" : "Not Working"}
-              </span>
-            </div>
-          </Col>
-          <Col span={6}>
-            <h3 className="switch-label">Inlet Valve</h3>
-            <div className="status-icon">
-              {inletValve ? (
-                <CheckCircleTwoTone twoToneColor="#52c41a" />
-              ) : (
-                <CloseCircleTwoTone twoToneColor="#eb2f96" />
-              )}
-              <span className="status-text">
-                {inletValve ? "Working" : "Not Working"}
-              </span>
-            </div>
-          </Col>
-          <Col span={6}>
-            <h3 className="switch-label">Outlet Valve</h3>
-            <div className="status-icon">
-              {outletValve ? (
-                <CheckCircleTwoTone twoToneColor="#52c41a" />
-              ) : (
-                <CloseCircleTwoTone twoToneColor="#eb2f96" />
-              )}
-              <span className="status-text">
-                {outletValve ? "Working" : "Not Working"}
-              </span>
-            </div>
-          </Col>
-          <Col span={6}>
-            <h3 className="switch-label">Motor Pump</h3>
-            <div className="status-icon">
-              {outletValve ? (
-                <CheckCircleTwoTone twoToneColor="#52c41a" />
-              ) : (
-                <CloseCircleTwoTone twoToneColor="#eb2f96" />
-              )}
-              <span className="status-text">
-                {outletValve ? "Working" : "Not Working"}
-              </span>
-            </div>
-          </Col>
-        </Row>
-      </Card>
+
+     
     </Layout>
   );
 }

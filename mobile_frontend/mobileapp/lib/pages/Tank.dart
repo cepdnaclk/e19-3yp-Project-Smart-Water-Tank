@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:mobileapp/handle/userPro.dart';
+import 'package:provider/provider.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:liquid_progress_indicator_v2/liquid_progress_indicator.dart';
+
 
 class Tank extends StatefulWidget{
   @override
@@ -9,10 +16,15 @@ class _tank extends State<Tank>{
 
   int inlet_v=0;
   int outlet_v=0;
+  double waterLevel=0.25;
+ 
 
   @override
   Widget build(BuildContext context){
     final screenSize = MediaQuery.of(context).size; // Define screenSize variable
+    String uid= Provider.of<userpro>(context).id;
+    String user= Provider.of<userpro>(context).name;
+    waterLevel= double.parse(Provider.of<userpro>(context).level);
     return Scaffold(
       appBar:AppBar(
         title: SizedBox(
@@ -35,21 +47,36 @@ class _tank extends State<Tank>{
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Container(
+           Text('CURRENT WATER LEVEL',style: TextStyle(
+            fontSize: 20,
+            fontFamily: 'Rubik',
+          ),),
+        
+          Text('Hi $user!!!',style: TextStyle(
+            fontSize: 20,
+            fontFamily: 'Rubik',
+          ),),
+         Container(
+
+
            
            
             margin: EdgeInsets.fromLTRB(20, 5, 20, 5),
             //color: Colors.amber,
             child:SizedBox(
-          height: screenSize.height * 0.4, // Set maximum height for the image
-          child: Image.asset(
-            'assets/Tank.png',
-            fit: BoxFit.contain,
-          ),
+          height: screenSize.height * 0.4,
+          width: screenSize.width*0.5, // Set maximum height for the image
+         child:  LiquidCircularProgressIndicator(
+          value: waterLevel, // Set the progress value between 0.0 and 1.0
+          valueColor: AlwaysStoppedAnimation(Color.fromARGB(207, 27, 123, 201)),
+          backgroundColor: Colors.white,
+          direction: Axis.vertical,
+          center: Text("$waterLevel"),
+          borderColor: const Color.fromARGB(255, 15, 41, 63),
+          borderWidth: 5,
         ),
-
-           
-            ),
+              ),
+        ),
             
          
           Container(
@@ -138,6 +165,18 @@ DropdownButton<String>(
                     }, icon: Icon(Icons.undo))],
 
                 ),
+                 Consumer<userpro>(
+              builder: (context, userpro, child) {
+                return ElevatedButton(
+                  onPressed: () {
+                    //userpro.Setupdata(uid);
+                    userpro.getwaterLevel();
+                    
+                  },
+                  child: Text('get data'),
+                );
+              },
+            ),
               ],)
               ),
                

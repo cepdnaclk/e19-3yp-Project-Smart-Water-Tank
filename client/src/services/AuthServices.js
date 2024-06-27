@@ -1,8 +1,10 @@
 import axios from 'axios';
+// const url = "http://ec2-54-234-133-143.compute-1.amazonaws.com:4000"
+// const url = "http://localhost:4000";
 
 const register = async (fullName, email, password) => {
   try {
-    const response = await axios.post('api/user/register', {
+    const response = await axios.post(`/api/user/register`, {
       fullName,
       email,
       password,
@@ -19,7 +21,7 @@ const register = async (fullName, email, password) => {
 
 const login = async (email, password) => {
   try {
-    const response = await axios.post('api/user/login', {
+    const response = await axios.post(`/api/user/login`, {
       email,
       password,
     });
@@ -40,7 +42,7 @@ const login = async (email, password) => {
 const getData = async () => {
   try {
     const response = await axios.post(
-      'api/user/get-user-info-by-id',
+      `/api/user/get-user-info-by-id`,
       {},
       {
         headers: {

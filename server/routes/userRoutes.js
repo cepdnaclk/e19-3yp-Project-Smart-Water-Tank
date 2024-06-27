@@ -5,6 +5,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const authmiddleware = require("../middleware/authmiddleware");
 
+console.log("Inside user routes");
+
 router.post("/register", async (req, res) => {
   try {
     const userExists = await userModel.findOne({ email: req.body.email });

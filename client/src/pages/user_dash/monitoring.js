@@ -1,6 +1,7 @@
 // Monitoring.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import "./styles/monitoring.css";
 import {
   Avatar,
   Card,
@@ -14,21 +15,20 @@ import {
 } from "antd";
 import LiquidGauge from "react-liquid-gauge";
 import Layout from "../../components/layout";
-import "./styles/monitoring.css";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { useEffect } from "react";
 
 export default function Monitoring() {
   const { Meta } = Card;
   const [isTankRegistered, setIsTankRegistered] = useState(false);
-  const [waterLevel, setWaterLevel] = useState();
+  const [waterLevel, setWaterLevel] = useState(0);
   const [previousMonthUsage, setPreviousMonthUsage] = useState(75);
   const [dailyWaterUsage, setDailyWaterUsage] = useState(
     generatePast30DaysData()
   );
   const [tankId, setTankId] = useState("");
   const { user } = useSelector((state) => state.user);
+  const [waterLevelBoundary, setWaterLevelBoundary] = useState(100);
 
   function generatePast30DaysData() {
     const today = new Date();
@@ -56,14 +56,10 @@ export default function Monitoring() {
     },
   ];
 
-  const isTankRegistere = async () => {
-
-
+  const isTankRegisteredAPI = async () => {
     try {
-      const response = await axios.get("/api/user/hardware/tank-exits", {
-        params: {
-          userId: user?._id,
-        },
+      const response = await axios.post(`/api/user/hardware/tank-exits`, {
+        userId: user?._id,
       });
 
       console.log("Registration successful:", response.data.success);
@@ -86,7 +82,7 @@ export default function Monitoring() {
   const handleRegistration = async () => {
     try {
       const response = await axios.post(
-        "/api/user/hardware/tank-registration",
+        `/api/user/hardware/tank-registration`,
         {
           tankId,
           waterLevel,
@@ -109,47 +105,46 @@ export default function Monitoring() {
   };
 
   const getWaterLevel = async () => {
-
-    try{
-
-      const response = await axios.get(
-        "/api/user/hardware/receive-water-level", {
-          params: {
-            userId: user?._id,
-          },
+    try {
+      const response = await axios.post(
+        `/api/user/hardware/receive-water-level`,
+        {
+          userId: user?._id,
         }
       );
 
-      console.log("water level:", response.data.data.waterLevel);
-
+      console.log("Water level:", response.data.data.waterLevel);
       setWaterLevel(response.data.data.waterLevel);
-
       console.log("Registration successful:", response.data.success);
-
-    }catch(error){
-
+    } catch (error) {
       console.error("Registration failed:", error);
       throw error;
-
     }
+  };
 
-
-  }
+  const handleWaterLevelBoundarySubmit = () => {
+    console.log("Water level boundary submitted:", waterLevelBoundary);
+    toast.success("Water level boundary set successfully!");
+  };
 
   useEffect(() => {
-    isTankRegistere();
+    isTankRegisteredAPI();
 
-    try{
+    try {
       if (isTankRegistered) {
-
         getWaterLevel();
-        
+  
+        const intervalId = setInterval(getWaterLevel, 30000); 
+
+
+        // Cleanup the interval on component unmount
+        return () => clearInterval(intervalId);
       }
-    }catch(error){
+    } catch (error) {
       console.error("Registration failed:", error);
       throw error;
     }
-  });
+  }, [isTankRegistered]);
 
   return (
     <Layout>
@@ -165,7 +160,7 @@ export default function Monitoring() {
                 height={200}
                 value={waterLevel}
                 fontSize={24}
-                textColor="#000"
+                textColor={waterLevel > waterLevelBoundary ? "red" : "#000"}
               />
               <Meta
                 avatar={
@@ -174,35 +169,24 @@ export default function Monitoring() {
                 title="Water Level"
                 description="This gives approximate water level in the tank."
               />
-            </Card>
-
-            <Card className="card-monitoring">
-              <Meta
-                avatar={
-                  <Avatar src="https://clipart-library.com/images/Lcd5ndBri.jpg" />
-                }
-                title="Previous Month Usage"
-                description="This gives the usage details for the previous month. Click below to see day-by-day usage."
-              />
-
-              <div style={{ marginTop: "16px" }}>
-                <h3>Total Monthly Usage</h3>
-                <Progress percent={previousMonthUsage} status="active" />
-              </div>
-            </Card>
-
-            <Row gutter={16}>
-              <Col span={24}>
-                <Card className="card-monitoring" style={{ width: "1000px" }}>
-                  <Table
-                    dataSource={dailyWaterUsage}
-                    columns={columns}
-                    pagination={false}
-                    scroll={{ y: 200 }}
+              {isTankRegistered && (
+                <div className="water-level-boundary">
+                  <label>Set Water Level Boundary:</label>
+                  <Input
+                    type="number"
+                    value={waterLevelBoundary}
+                    onChange={(e) => setWaterLevelBoundary(e.target.value)}
                   />
-                </Card>
-              </Col>
-            </Row>
+                  <Button
+                    type="primary"
+                    onClick={handleWaterLevelBoundarySubmit}
+                    className="submit-button"
+                  >
+                    Set Boundary
+                  </Button>
+                </div>
+              )}
+            </Card>
           </>
         ) : (
           <Form className="card-monitoring">

@@ -1,0 +1,26 @@
+import React from 'react';
+import { render, fireEvent } from '@testing-library/react';
+import ControlPanel from './ControlPanel';
+
+describe('ControlPanel component', () => {
+  it('should handle Output Valve button click', () => {
+    const { getByText } = render(<ControlPanel />);
+
+    const outputValveButton = getByText('Output Valve');
+    fireEvent.click(outputValveButton);
+
+    // Assert the expected behavior after the button click
+    // For example, check if the state has changed or a network request was made
+    // Expectations/assertions can be added here based on the behavior you expect.
+  });
+
+  it('should handle Input Valve button click', () => {
+    // Similar test for Input Valve button click
+  });
+
+  it('should handle Motor Pump button click', () => {
+    // Similar test for Motor Pump button click
+  });
+
+  // Add more test cases for other functionalities as needed
+});

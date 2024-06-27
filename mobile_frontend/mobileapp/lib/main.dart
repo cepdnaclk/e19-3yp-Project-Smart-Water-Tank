@@ -7,17 +7,26 @@ import 'pages/loading.dart';
 import 'pages/usage.dart';
 import 'Auth/login.dart';
 import 'Auth/signup.dart';
+import 'package:provider/provider.dart';
+import 'package:mobileapp/handle/userPro.dart';
+
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => userpro()),
+      ],
+      child: MyApp(),
+    ),
+  );
+}
 
 
 class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)=>MaterialApp(
     // Your code here
-    return Container();
-  }
-}
-// ignore: prefer_const_constructors
-void main() =>runApp(MaterialApp(
+  debugShowCheckedModeBanner: false,
   initialRoute: '/login',
   routes:{
     
@@ -27,9 +36,9 @@ void main() =>runApp(MaterialApp(
     '/inout':(context) =>In_out(),
     '/bill':(context) => Bill(),
     '/usage':(context) => Usage(),
-    '/login':(context) => const Login(),
-    '/signin':(context) => const Signup(),
+    '/login':(context) =>  LoginPage(),
+    '/signin':(context) => RegisterPage(),
   }
-));
+);
 
-
+}

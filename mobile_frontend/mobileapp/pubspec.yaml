@@ -32,6 +32,11 @@ dependencies:
     sdk: flutter
   api_cache_manager: ^1.0.2
   snippet_coder_utils: ^1.0.9
+  provider: ^5.0.0 #dependency for state management
+  liquid_progress_indicator_v2: ^0.5.0
+  http: ^0.13.3 #dependency for http requests
+  flutter_spinkit: ^5.0.0
+  shared_preferences: ^2.0.6
 
 
   # The following adds the Cupertino Icons font to your application.

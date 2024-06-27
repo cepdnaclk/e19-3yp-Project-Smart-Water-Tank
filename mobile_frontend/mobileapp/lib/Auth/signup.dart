@@ -1,166 +1,209 @@
 import 'package:flutter/material.dart';
-import 'package:mobileapp/Auth/api_service.dart';
-import 'package:mobileapp/Auth/sign_request_model.dart';
-import 'package:mobileapp/utill/User_func.dart';
-import 'package:mobileapp/components/cusButton.dart';
-import 'package:mobileapp/components/cusText.dart';
-import 'package:mobileapp/components/custextField.dart';
-import 'package:mobileapp/Auth/login.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
 
-
-class Signup extends StatefulWidget {
-  const Signup({super.key});
-
+class RegisterPage extends StatefulWidget {
   @override
-  State<Signup> createState()=> _SignUpState();
-
+  _RegisterPageState createState() => _RegisterPageState();
 }
 
-class  _SignUpState extends State<Signup> {
+class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
-  bool isAPIcallProcess = false;
-  bool hidePassword = true;
-  GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
-  String? name;
-  String? email;
-  String? password;
-  String? confirmPassword;
-  @override
-  Widget build(BuildContext context) {
+  Future<void> registerUser() async {
+    final String fullName = _fullNameController.text;
+    final String email = _emailController.text;
+    final String password = _passwordController.text;
+    final String confirmPassword = _confirmPasswordController.text;
 
-    MediaQueryData mediaQueryData = MediaQuery.of(context);
-    return Scaffold(
-      body:SingleChildScrollView(
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: mediaQueryData.size.height * 0.02),
-            child: Column(
-              children: [
-                SizedBox(height: mediaQueryData.size.height * 0.05),
-                //Align(
-                 // alignment: Alignment.bottomLeft,
-                  //child: InkWell(
-                   // onTap: () {
-                     // UtilFunction.navigateBackward(
-                    //      context, const SignUpDescription());
-                    //},
-                   // child: const Icon(Icons.arrow_back_ios_new_outlined),
-                  //),
-                //),
-                SizedBox(height: mediaQueryData.size.height * 0.05),
-                CustomText(
-                  "SignUp",
-                  fontSize: mediaQueryData.size.height * 0.04,
-                  fontWeight: FontWeight.w600,
+    if (password != confirmPassword) {
+      print('Passwords do not match');
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Passwords do not match'),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://54.208.4.191/api/user/register'),
+        headers: {
+        HttpHeaders.contentTypeHeader: 'application/json',
+      },
+      body: json.encode({
+        'fullName': fullName,
+        'email': email,
+        'password': password,
+      }),
+      
+      );
+
+      final responseData = json.decode(response.body);
+       print(responseData['message']);
+       
+
+      if (response.statusCode == 200 && responseData['success']) {
+         print(responseData);
+         
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Success'),
+              content: Text('User registered successfully'),
+              actions: [
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.pushNamed(context, '/login');
+                  },
                 ),
-                
-                SizedBox(height: mediaQueryData.size.height * 0.05),
-                CustomTextFeild(
-                  lable: "Enter your full name",
-                  mediaQueryData: mediaQueryData,
-                  keyboardType: TextInputType.text,
-                  onChanged: (value) {
-                          setState(() {
-                            name = value;
-                          });
-                        },
-                ),
-                SizedBox(height: mediaQueryData.size.height * 0.01),
-                CustomTextFeild(
-                  lable: "Enter your email",
-                  mediaQueryData: mediaQueryData,
-                  keyboardType: TextInputType.emailAddress,
-                  onChanged: (value) {
-                          setState(() {
-                            email = value;
-                          });
-                        },
-                ),
-                SizedBox(height: mediaQueryData.size.height * 0.01),
-                CustomTextFeild(
-                  lable: "Create password",
-                  obscure: true,
-                  mediaQueryData: mediaQueryData,
-                  keyboardType: TextInputType.visiblePassword,
-                  onChanged: (value) {
-                          setState(() {
-                            password = value;
-                          });
-                        },
-                ),
-                SizedBox(height: mediaQueryData.size.height * 0.01),
-                CustomTextFeild(
-                  lable: "Confirm password",
-                  obscure: true,
-                  mediaQueryData: mediaQueryData,
-                  keyboardType: TextInputType.visiblePassword,
-                  onChanged: (value) {
-                          setState(() {
-                            confirmPassword = value;
-                          });
-                        },
-                ),
-                SizedBox(height: mediaQueryData.size.height * 0.07),
-                 InkWell(
-                      onTap:(){
-                        if(validateAndSave()){
-                          print ("name: $name");
-                          setState((){
-                            isAPIcallProcess = true;
-                            });
-                            sign_request_model model =  sign_request_model(
-                              fullname: name!,
-                              email: email!, 
-                              password: password!,
-                              );
-                              APIService.register(model).then((response){
-                                print("response: $response");
-                                print("full name: $name");
-
-                                if (response !=null ){
-                                  Navigator.pushNamedAndRemoveUntil(context,'/login', (route) => false,);
-                                }else{
-
-                                }
-                              });
-                        }
-                        
-
-                       
-
-                      },
-                      child: CustomButton(
-                        "Register",
-                        mediaQueryData: mediaQueryData,
-                        width: mediaQueryData.size.width,
-                        
-                      ),
-                    ),
               ],
-            ),
-          ),
-        ),
-
-      )
-        
-
-     );
+            );
+          },
+        );
+      } else if (response.statusCode == 200 && !responseData['success']) {
+         print('30');
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Error'),
+              content: Text('Email already exists'),
+              actions: [
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        print('40');
+        print(responseData['message']);
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Error'),
+              content: Text('Error creating user: ${responseData['message']}'),
+              actions: [
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+     
     
-  }
-    bool validateAndSave() {
-    if (name != null && email != null && password != null && confirmPassword != null) {
-    if (name!.isEmpty || email!.isEmpty || password!.isEmpty || confirmPassword!.isEmpty) {
-      // Handle empty fields
-      return false;
-    } else if (password != confirmPassword) {
-      // Handle password mismatch
-      return false;
-    } else {
-      return true;
+    } catch (e) {
+      
+      print(e); 
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Error: $e'),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
     }
   }
-  return false;
-  
-}
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Register'),
+        actions: [
+          TextButton(
+            child: Text(
+              'home',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18.0,
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/home');
+            },
+          ),],
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _fullNameController,
+              decoration: InputDecoration(
+                labelText: 'Full Name',
+              ),
+            ),
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                labelText: 'Email',
+              ),
+            ),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(
+                labelText: 'Password',
+              ),
+              obscureText: true,
+            ),
+            TextField(
+              controller: _confirmPasswordController,
+              decoration: InputDecoration(
+                labelText: 'Confirm Password',
+              ),
+              obscureText: true,
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: registerUser,
+              child: Text('Register'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

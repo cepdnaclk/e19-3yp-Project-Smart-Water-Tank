@@ -1,64 +1,74 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
 
+.header {
+  background-color: #fff;
+  color: #fff;
+  padding: 10px;
+  text-align: center;
+}
 
-  
-  .card-container {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-  }
-  
+.page-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin-bottom: 16px;
+  max-width: calc(1200px - 40px); /* Adjust the margin and padding */
+}
+
+.card {
+  flex: 1 1 calc(50% - 32px);
+  margin: 16px;
+  padding: 16px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 768px) {
   .card {
-    width: 300px;
-   
-    margin-top: 16px;
-    padding: 16px;
-    border: 1px solid #e8e8e8;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-basis: calc(50% - 32px);
   }
-  
-  .switch-container {
-    margin-top: 20px;
-  }
-  
-  .switch-label {
-    font-size: 16px;
-    margin-bottom: 8px;
-  }
-  
-  .status-card {
-    width: 100%;
-    margin-top: 16px;
-    padding: 16px;
-    border: 1px solid #e8e8e8;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Add this line to evenly space content */
-  }
-  
-  .status-label {
-    font-size: 18px;
-    margin-bottom: 8px;
-  }
-  
+}
+
+.switch-container {
+  margin-top: 20px;
+}
+
+.switch-label {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.guide-section {
+  margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.guide-section h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.guide-section p {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+/* Responsive font size for status text */
+@media (min-width: 768px) {
   .status-text {
-    font-size: 16px;
+    font-size: 18px; /* Adjust based on your design */
   }
-  
-  .status-icon {
-    display: flex;
-    align-items: center;
-  }
-  
-  .button-container {
-    margin-top: 20px;
-  }
-  
-  .button-primary {
-    width: 100%;
-  }
-  
-  /* Adjust styles based on your design preferences */
-  
+}

@@ -10,6 +10,8 @@ import { hideLoading } from "../../redux/alertsSlice";
 import toast from "react-hot-toast";
 import { setUser } from "../../redux/userSlice";
 import axios from "axios";
+// const url = "http://localhost:4000";
+// const url = "http://ec2-54-234-133-143.compute-1.amazonaws.com:4000";
 
 const { TabPane } = Tabs;
 
@@ -27,7 +29,7 @@ export default function Notification() {
     try {
       dispatch(showLoading());
       const response = await axios.post(
-        "api/user/mark-all-notification-seen",
+        `/api/user/mark-all-notification-seen`,
         {
           userId: user._id,
         },
@@ -56,7 +58,7 @@ export default function Notification() {
     try {
       dispatch(showLoading());
       const response = await axios.post(
-        "api/user/delete-all-notification",
+        `/api/user/delete-all-notification`,
         {
           userId: user._id,
         },

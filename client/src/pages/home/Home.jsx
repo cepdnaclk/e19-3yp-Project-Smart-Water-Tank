@@ -17,21 +17,21 @@ export default function Home() {
         </div>
         <div className="carousel-inner">
           <div className="carousel-item active" data-bs-interval="1000">
-            <img src="https://via.placeholder.com/1200x600" className="d-block w-100" alt="First slide" />
+            <img src="assets/images/slide1.png" className="d-block w-100" alt="First slide" />
             <div className="carousel-caption d-none d-md-block">
               <h5>First slide label</h5>
               <p>Some representative placeholder content for the first slide.</p>
             </div>
           </div>
           <div className="carousel-item" data-bs-interval="2000">
-            <img src="https://via.placeholder.com/1200x600" className="d-block w-100" alt="Second slide" />
+            <img src="assets/images/slide2.jpeg" className="d-block w-100" alt="Second slide" />
             <div className="carousel-caption d-none d-md-block">
               <h5>Second slide label</h5>
               <p>Some representative placeholder content for the second slide.</p>
             </div>
           </div>
           <div className="carousel-item">
-            <img src="https://via.placeholder.com/1200x600" className="d-block w-100" alt="Third slide" />
+            <img src="assets/images/slide3.png" className="d-block w-100" alt="Third slide" />
             <div className="carousel-caption d-none d-md-block">
               <h5>Third slide label</h5>
               <p>Some representative placeholder content for the third slide.</p>

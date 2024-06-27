@@ -133,4 +133,34 @@ body {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle box shadow */
   }
-  
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+      padding: 0 45px;
+  }
+
+  .img-col {
+      display: none; /* Show the image column on tablets */
+  }
+
+  .form_input {
+      padding: 40px; /* Adjust padding for the form on tablets */
+  }
+}
+
+/* Responsive adjustments for smaller screens (e.g., mobile phones) */
+@media (max-width: 768px) {
+  .container {
+      padding: 0 35px;
+  }
+
+  .img-col {
+      display: none; /* Hide the image column on smaller screens */
+  }
+
+  .form_input {
+    padding: 20px; /* Adjust padding for the form on smaller screens */
+    width: 80%; /* Set a specific width for the form on mobile phones */
+    margin: 0 auto; /* Center the form horizontally */
+}
+}

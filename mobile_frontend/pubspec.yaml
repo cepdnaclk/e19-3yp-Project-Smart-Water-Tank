@@ -31,6 +31,9 @@ dependencies:
   flutter:
     sdk: flutter
   syncfusion_flutter_charts: ^24.1.44+1 #dependency for charts
+  provider: ^5.0.0 #dependency for state management
+  liquid_progress_indicator_v2: ^0.5.0
+  http: ^0.13.3 #dependency for http requests
 
 
 
@@ -49,7 +52,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

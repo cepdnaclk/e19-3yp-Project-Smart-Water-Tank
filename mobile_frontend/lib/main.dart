@@ -68,12 +68,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 primaryYAxis: NumericAxis(
                   title: AxisTitle(text: "Liters"),
                 ),
-                series: <ChartSeries>[
+                series: <CartesianSeries>[
                   ColumnSeries<WaterData, String>(
                     dataSource: getColumnData(),
                     xValueMapper: (WaterData level, _) => level.x,
                     yValueMapper: (WaterData level, _) => level.y,
-                    dataLabelSettings: DataLabelSettings(isVisible: true),
+                    dataLabelSettings: const DataLabelSettings(isVisible: true),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ],
